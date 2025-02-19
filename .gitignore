@@ -1,0 +1,23 @@
+# Virtuelle Umgebungen
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyCharm & VSCode Projektdateien
+.idea/
+.vscode/
+
+# Logfiles
+logs/
+*.log
+
+# SQLite-Datenbank (falls nicht gewollt)
+*.sqlite3
+*.db
+
+# Caches
+*.cache
+*.pyc
