@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -7,11 +7,31 @@ CORS(app)  # This will enable CORS for all routes
 POSTS = [
     {"id": 1, "title": "First post", "content": "This is the first post."},
     {"id": 2, "title": "Second post", "content": "This is the second post."},
+    {"id": 3, "title": "Another post", "content": "Learning Flask is little bit of fun!"},
 ]
 
 
+# Combination of the startpage function and sort function
+# Returns a list of posts, optionally sorted by title or content.
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
+    sort_by = request.args.get('sort')
+    direction = request.args.get('direction', 'asc')
+
+    if sort_by and sort_by not in ["title", "content"]:
+        return jsonify({"error": f"Invalid sort field '{sort_by}'. Allowed: 'title', 'content'"}), 400
+
+    if direction not in ["asc", "desc"]:
+        return jsonify({"error": f"Invalid direction '{direction}'. Allowed: 'asc', 'desc'"}), 400
+
+    if sort_by in ["title", "content"]:
+        reverse = direction == "desc"
+        sorted_posts = sorted(POSTS, key=lambda x: x[sort_by], reverse=reverse)
+        return sorted_posts
+
+    else:
+        sorted_posts = POSTS
+
     return jsonify(POSTS)
 
 
@@ -57,6 +77,21 @@ def update_post(post_id):
     post["content"] = data.get("content", post["content"])
 
     return jsonify(post), 200
+
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    title_query = request.args.get('title', '').lower()
+    content_query = request.args.get('content', '').lower()
+    if not title_query and not content_query:
+        return jsonify(POSTS)
+    filtered_posts = [
+        post for post in POSTS
+        if (title_query and title_query in post["title"].lower()) or
+           (content_query and content_query in post["content"].lower())
+    ]
+
+    return jsonify(filtered_posts)
 
 
 if __name__ == '__main__':
