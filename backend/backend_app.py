@@ -37,6 +37,18 @@ def get_posts():
 
 @app.route('/api/posts', methods=['POST'])
 def add_post():
+    """
+        Add a new blog post.
+
+        Request Body (JSON):
+            - title: The title of new blog post.
+            - content: The content of new blog post.
+
+        Returns:
+            - JSON with new post.
+            - HTTP 400 (Bad Request) if title or content is empty.
+            - HTTP 201 (Created) on success.
+        """
     data = request.get_json()
     # Error handling
     if not data or 'title' not in data or 'content' not in data:
@@ -54,6 +66,16 @@ def add_post():
 
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
+    """
+           Deleting blog posts by id.
+
+           Query Parameters:
+               - id
+
+           Returns:
+               - A json list without deleted blog posts.
+               - An error, if id not found.
+           """
     global POSTS
     post = next((post for post in POSTS if post["id"] == post_id), None)
 
@@ -67,10 +89,26 @@ def delete_post(post_id):
 
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
+    """
+        Update an existing blog post.
+
+        Request Parameters:
+            - post_id of the psot, that should be updated
+
+        Request Body:
+        (json)
+            - title: Changed title of the post.
+            - content: Changed content of the post.
+
+        Returns:
+            - A JSON of the updated post.
+            - HTTP 404 if the post ID does not exist.
+            - HTTP 200 on success.
+        """
     post = next((post for post in POSTS if post["id"] == post_id), None)
 
     if post is None:
-        return jsonify({"message": f"Post with id{post_id} not found!"}), 404
+        return jsonify({"message": f"Post with id {post_id} not found!"}), 404
 
     data = request.get_json()
     post["title"] = data.get("title", post["title"])
@@ -81,6 +119,20 @@ def update_post(post_id):
 
 @app.route('/api/posts/search', methods=['GET'])
 def search_posts():
+    """
+        Searching for blog posts by title or content.
+
+        This endpoint allows to search for posts, that contain
+        the given search argument in the title or content.
+
+        Query Parameters:
+            - title (str, optional): Keyword to search for in post titles.
+            - content (str, optional): The keyword to search for in post content.
+
+        Returns:
+            - A json list of matching blog posts.
+            - An empty list, if no matches are found.
+        """
     title_query = request.args.get('title', '').lower()
     content_query = request.args.get('content', '').lower()
     if not title_query and not content_query:
